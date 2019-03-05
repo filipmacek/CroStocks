@@ -18,12 +18,11 @@ from django.urls import path
 from django.views.generic import TemplateView
 from CroStocks import views
 from django.urls import include
-import Stock,Portfolio,Blog
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.home_page),
-    path('/stock/',include('Blog.views')),
-    path('/portfolio/',include('Portfolio.views')),
-    path('/blog/',include('Blog.views')),
+    path('blog/',include('Blog.urls')),
+    path('about-us/',TemplateView.as_view(template_name='about_us.html'))
 ]
