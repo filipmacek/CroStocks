@@ -1,0 +1,13 @@
+Array.from(
+	document.querySelectorAll('#ctl03_gvMarketTrades_DXMainTable tr:not(:first-child)'))
+	.map( a => a.innerText)
+	.map(a => a.split('\t')
+)
+
+gumbi:
+var buttons = document.querySelectorAll('.dxp-num')
+buttons.forEach(button => button.click());
+
+
+
+('.dxWeb_pNext_002').click()
