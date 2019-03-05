@@ -24,5 +24,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.home_page),
     path('blog/',include('Blog.urls')),
-    path('about-us/',TemplateView.as_view(template_name='about_us.html'))
+    path('about-us/',TemplateView.as_view(template_name='about_us.html')),
+    path('contact-us/',TemplateView.as_view())
 ]
