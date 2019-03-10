@@ -5,8 +5,7 @@ from CroStocks import views
 from django.urls import include
 from django.conf.urls.static import static
 from django.conf import settings
-
-
+from Stock import views
 urlpatterns=[
     path('',views.list_all_stocks,name='all_stocks')
 ]

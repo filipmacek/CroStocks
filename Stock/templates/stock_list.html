@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
+    <hr>
+
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="row">#</th>
+            <th scope="col">Ticker</th>
+            <th scope="col">Company</th>
+            <th scope="col">ISIN</th>
+            <th scope="col">Number of issued stocks</th>
+            <th scope="col">Nominal value</th>
+            <th scope="col">Issuance Date</th>
+            <th scope="col">URL</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for stock in stocks %}
+    <tr>
+        <th scope="row">{{ stock.id }}</th>
+        <td>{{ stock.ticker }}</td>
+        <td>{{ stock.company }}</td>
+        <td>{{ stock.isin }}</td>
+        <td>{{ stock.num_stocks }}</td>
+        <td>{{ stock.nominal }}</td>
+        <td>{{ stock.issuance_date }}</td>
+        <td><a href="{{ stock.url }}">{{ stock.url }}</a></td>
+
+    </tr>
+
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+
+
+
+
+
+
+{% endblock %}
