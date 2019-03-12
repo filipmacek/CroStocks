@@ -84,7 +84,7 @@ def print_column(col, temp):
 
 def find_element_in_column(elem,col,temp):
     for row_index in range(temp.nrows):
-        if elem==temp.cell(row_index,col).value:
+        if elem==str(temp.cell(row_index,col).value):
             break
     return row_index
 
@@ -117,11 +117,11 @@ def find_element_in_column(elem,col,temp):
 # temp_nti=xlfile.sheet_by_name('NT_I')
 
 
-def input_data(temp,data):
+def input_data(temp,data,aop_index):
 
         x,aop_columna=find_element('AOP',temp)
 
-        begin_aop_index=find_element_in_column(1.0,aop_columna,temp)
+        begin_aop_index=find_element_in_column(aop_index,aop_columna,temp)
 
         text=[]
         for i in range(begin_aop_index, temp.nrows):
@@ -134,87 +134,104 @@ def input_data(temp,data):
         return data
 
 
-kreiranje=[False,False,False,False]
-nismo=[]
-for item in os.listdir('D:\ZSE'):
-    curdir = os.path.join('D:\ZSE',item)
-    files=os.listdir(curdir)
-    for st in files:
-        if st[0:12]==(item+"-fin2018") and st[len(st)-4:]==".xls":
-            xl=xlrd.open_workbook(os.path.join(curdir,st))
-
-
-            #Bilanca
-
-            if "Bilanca" in xl.sheet_names():
-                temp=xl.sheet_by_name('Bilanca')
-                aop_columna=[]
-
-                #Kreiranja inicijalne bilance
-                if kreiranje[0]==False:
-                    begin_aop_index = find_element_in_column(1.0, aop_columna, temp)
-                    col_aop = []
-                    for i in range(begin_aop_index, temp.nrows):
-                        if str(temp.cell(i, aop_columna).value) != '':
-                            col_aop.append(str(temp.cell(i, aop_columna).value))
-                    bilanca = pd.DataFrame(columns=col_aop)
-                    kreiranje[0]=True
-
-                bilanca=input_data(temp,bilanca)
+def findnth(string, substring, n):
+    parts = string.split(substring, n + 1)
+    if len(parts) <= n + 1:
+        return -1
+    return len(string) - len(parts[-1]) - len(substring)
 
 
 
-            #RDG
 
-            if "RDG" in xl.sheet_names():
-                temp = xl.sheet_by_name('RDG')
-                aop_columna = []
+if __name__=='__main__':
+    kreiranje = [False, False, False, False]
+    nema = ['CROS', 'ELPR', 'IKBA', 'KABA', 'PDBA', 'SNBA', 'TKPR', 'ZABA', 'HPB', 'JDOS', 'KBZ', 'PBZ']
+    for item in os.listdir('D:\ZSE'):
+        if item in nema:
+            continue
+        curdir = os.path.join('D:\ZSE', item)
+        files = os.listdir(curdir)
+        for st in files:
+            if st[0:findnth(st, '-', 1)] == (item + "-fin2018") and (
+                    st[len(st) - 4:] == ".xls" or st[len(st) - 5:] == ".xlsx"):
+                xl = xlrd.open_workbook(os.path.join(curdir, st))
+                print(item)
 
-                # Kreiranja inicijalnnog RDG-a
-                if kreiranje[1] == False:
-                    begin_aop_index = find_element_in_column(1.0, aop_columna, temp)
-                    col_aop = []
-                    for i in range(begin_aop_index, temp.nrows):
-                        if str(temp.cell(i, aop_columna).value) != '':
-                            col_aop.append(str(temp.cell(i, aop_columna).value))
-                    rdg = pd.DataFrame(columns=col_aop)
-                    kreiranje[1]=True
+                # Bilanca
 
-                rdg=input_data(temp,rdg)
+                if "Bilanca" in xl.sheet_names():
+                    temp = xl.sheet_by_name('Bilanca')
+                    x, aop_columna = find_element('AOP', temp)
 
-            #NTI
-            if "NT_I" in xl.sheet_names():
-                temp = xl.sheet_by_name('NT_I')
-                aop_columna = []
+                    # Kreiranja inicijalne bilance
+                    if kreiranje[0] == False:
+                        begin_aop_index = find_element_in_column("1.0", aop_columna, temp)
+                        col_aop = []
+                        for i in range(begin_aop_index, temp.nrows):
+                            if str(temp.cell(i, aop_columna).value) != '':
+                                col_aop.append(str(temp.cell(i, aop_columna).value))
+                        bilanca = pd.DataFrame(columns=col_aop)
+                        kreiranje[0] = True
 
-                # Kreiranja inicijalne bilance
-                if kreiranje[2] == False:
-                    begin_aop_index = find_element_in_column(1.0, aop_columna, temp)
-                    col_aop = []
-                    for i in range(begin_aop_index, temp.nrows):
-                        if str(temp.cell(i, aop_columna).value) != '':
-                            col_aop.append(str(temp.cell(i, aop_columna).value))
-                    nti = pd.DataFrame(columns=col_aop)
-                    kreiranje[2]=True
+                    bilanca = input_data(temp, bilanca, '1.0')
 
-                nti=input_data(temp,nti)
+                # RDG
+
+                if "RDG" in xl.sheet_names():
+                    temp = xl.sheet_by_name('RDG')
+                    x, aop_columna = find_element('AOP', temp)
+
+                    # Kreiranja inicijalnnog RDG-a
+                    if kreiranje[1] == False:
+                        begin_aop_index = find_element_in_column("111.0", aop_columna, temp)
+                        col_aop = []
+                        for i in range(begin_aop_index, temp.nrows):
+                            if str(temp.cell(i, aop_columna).value) != '':
+                                col_aop.append(str(temp.cell(i, aop_columna).value))
+                        rdg = pd.DataFrame(columns=col_aop)
+                        kreiranje[1] = True
+
+                    rdg = input_data(temp, rdg, '111.0')
+
+                # NTI
+                if "NT_I" in xl.sheet_names():
+                    temp = xl.sheet_by_name('NT_I')
+                    x, aop_columna = find_element('AOP', temp)
+
+                    # Kreiranja inicijalne bilance
+                    if kreiranje[2] == False:
+                        begin_aop_index = find_element_in_column("1.0", aop_columna, temp)
+                        col_aop = []
+                        for i in range(begin_aop_index, temp.nrows):
+                            if str(temp.cell(i, aop_columna).value) != '':
+                                col_aop.append(str(temp.cell(i, aop_columna).value))
+                        nti = pd.DataFrame(columns=col_aop)
+                        kreiranje[2] = True
+
+                    nti = input_data(temp, nti, '1.0')
+
+                # PROMJENA KAPITALA
+                if "PK" in xl.sheet_names():
+                    temp = xl.sheet_by_name('PK')
+                    x, aop_columna = find_element('AOP', temp)
+
+                    # Kreiranja inicijalne bilance
+                    if kreiranje[3] == False:
+                        begin_aop_index = find_element_in_column("1.0", aop_columna, temp)
+                        col_aop = []
+                        for i in range(begin_aop_index, temp.nrows):
+                            if str(temp.cell(i, aop_columna).value) != '':
+                                col_aop.append(str(temp.cell(i, aop_columna).value))
+                        pk = pd.DataFrame(columns=col_aop)
+                        kreiranje[3] = True
+
+                    pk = input_data(temp, pk, '1.0')
+
+                break
+    bilanca.to_excel("Bilanca.xlsx")
+    rdg.to_excel("RDG.xlsx")
+    nti.to_excel("NTI.xlsx")
+    pk.to_excel("PK.xlsx")
 
 
-            #PROMJENA KAPITALA
-            if "PK" in xl.sheet_names():
-                temp = xl.sheet_by_name('PK')
-                aop_columna = []
-
-                # Kreiranja inicijalne bilance
-                if kreiranje[3] == False:
-                    begin_aop_index = find_element_in_column(1.0, aop_columna, temp)
-                    col_aop = []
-                    for i in range(begin_aop_index, temp.nrows):
-                        if str(temp.cell(i, aop_columna).value) != '':
-                            col_aop.append(str(temp.cell(i, aop_columna).value))
-                    pk = pd.DataFrame(columns=col_aop)
-                    kreiranje[3]=True
-
-                pk=input_data(temp,pk)
-
-            break
+    #PROVJERA
