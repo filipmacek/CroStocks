@@ -3,8 +3,19 @@ import openpyxl
 import xlrd
 import pandas as pd
 from xlrd.sheet import ctype_text
-
+import difflib
+import csv
 #POMOCNE FUNKCIJE
+def list_equal(list):
+    list=iter(list)
+    try:
+        first=next(list)
+    except StopIteration:
+        return True
+    return all(first==rest for rest in list)
+
+
+
 
 def sublist(list1,list2):
     ls=[item in list2 for item in list1]
@@ -117,13 +128,13 @@ def find_element_in_column(elem,col,temp):
 # temp_nti=xlfile.sheet_by_name('NT_I')
 
 
-def input_data(temp,data,aop_index):
+def input_data(temp,data,aop_index,item):
 
         x,aop_columna=find_element('AOP',temp)
 
         begin_aop_index=find_element_in_column(aop_index,aop_columna,temp)
 
-        text=[]
+        text=[item]
         for i in range(begin_aop_index, temp.nrows):
             if str(temp.cell(i, aop_columna).value) != '':
                 text.append(temp.cell(i,0).value)
@@ -141,14 +152,40 @@ def findnth(string, substring, n):
     return len(string) - len(parts[-1]) - len(substring)
 
 
+def rows_equal(data):
+    first=data.iloc[0]
+    for i in range(1,data.shape[0]):
+        print(i)
+        if first.equals(data.iloc[i])==False:
+            for j in range(1,data.iloc[i].shape[0]):
+                print(j)
+                if difflib.SequenceMatcher(None,first[j],data.iloc[i][j]).ratio()<0.85:
+                    print('jest')
+    return True
+
 
 
 if __name__=='__main__':
     kreiranje = [False, False, False, False]
-    nema = ['CROS', 'ELPR', 'IKBA', 'KABA', 'PDBA', 'SNBA', 'TKPR', 'ZABA', 'HPB', 'JDOS', 'KBZ', 'PBZ']
+    pat=os.path.join(os.getcwd(),"Stock","functions",'BussinesCompanies.csv')
+    nema =((pd.read_csv(pat,header=None)).iloc[0]).values.tolist()
+    nema.append("HPB")
+    nema.append('IKBA')
+    nema.append('KABA')
+    nema.append('KBZ')
+    nema.append('PBZ')
+    nema.append('PDBA')
+    nema.append("ELPR")
+    nema.append('TKPR')
+    nema.append('SNBA')
+    nema.append('ZABA')
+
+    problem=["CROS","CROS2","ELPR","JDOS","TKPR"]
     for item in os.listdir('D:\ZSE'):
         if item in nema:
             continue
+        else:
+            category1.append(item)
         curdir = os.path.join('D:\ZSE', item)
         files = os.listdir(curdir)
         for st in files:
@@ -166,14 +203,14 @@ if __name__=='__main__':
                     # Kreiranja inicijalne bilance
                     if kreiranje[0] == False:
                         begin_aop_index = find_element_in_column("1.0", aop_columna, temp)
-                        col_aop = []
+                        col_aop = ["Ticker"]
                         for i in range(begin_aop_index, temp.nrows):
                             if str(temp.cell(i, aop_columna).value) != '':
                                 col_aop.append(str(temp.cell(i, aop_columna).value))
                         bilanca = pd.DataFrame(columns=col_aop)
                         kreiranje[0] = True
 
-                    bilanca = input_data(temp, bilanca, '1.0')
+                    bilanca = input_data(temp, bilanca, '1.0',item)
 
                 # RDG
 
@@ -184,14 +221,14 @@ if __name__=='__main__':
                     # Kreiranja inicijalnnog RDG-a
                     if kreiranje[1] == False:
                         begin_aop_index = find_element_in_column("111.0", aop_columna, temp)
-                        col_aop = []
+                        col_aop = ["Ticker"]
                         for i in range(begin_aop_index, temp.nrows):
                             if str(temp.cell(i, aop_columna).value) != '':
                                 col_aop.append(str(temp.cell(i, aop_columna).value))
                         rdg = pd.DataFrame(columns=col_aop)
                         kreiranje[1] = True
 
-                    rdg = input_data(temp, rdg, '111.0')
+                    rdg = input_data(temp, rdg, '111.0',item)
 
                 # NTI
                 if "NT_I" in xl.sheet_names():
@@ -201,14 +238,14 @@ if __name__=='__main__':
                     # Kreiranja inicijalne bilance
                     if kreiranje[2] == False:
                         begin_aop_index = find_element_in_column("1.0", aop_columna, temp)
-                        col_aop = []
+                        col_aop = ["Ticker"]
                         for i in range(begin_aop_index, temp.nrows):
                             if str(temp.cell(i, aop_columna).value) != '':
                                 col_aop.append(str(temp.cell(i, aop_columna).value))
                         nti = pd.DataFrame(columns=col_aop)
                         kreiranje[2] = True
 
-                    nti = input_data(temp, nti, '1.0')
+                    nti = input_data(temp, nti, '1.0',item)
 
                 # PROMJENA KAPITALA
                 if "PK" in xl.sheet_names():
@@ -218,20 +255,30 @@ if __name__=='__main__':
                     # Kreiranja inicijalne bilance
                     if kreiranje[3] == False:
                         begin_aop_index = find_element_in_column("1.0", aop_columna, temp)
-                        col_aop = []
+                        col_aop = ["Ticker"]
                         for i in range(begin_aop_index, temp.nrows):
                             if str(temp.cell(i, aop_columna).value) != '':
                                 col_aop.append(str(temp.cell(i, aop_columna).value))
                         pk = pd.DataFrame(columns=col_aop)
                         kreiranje[3] = True
 
-                    pk = input_data(temp, pk, '1.0')
+                    pk = input_data(temp, pk, '1.0',item)
 
                 break
-    bilanca.to_excel("Bilanca.xlsx")
-    rdg.to_excel("RDG.xlsx")
-    nti.to_excel("NTI.xlsx")
-    pk.to_excel("PK.xlsx")
 
+    bilanca.to_excel("BilancaF.xlsx")
+    rdg.to_excel("RDGF.xlsx")
+    nti.to_excel("NTIF.xlsx")
+    pk.to_excel("PKF.xlsx")
+
+    # with open("BussinesCompanies.csv",'w') as f:
+    #     wr=csv.writer(f)
+    #     wr.writerow(category1)
+    # f.close()
+    #
+    # with open("FinancialCompanies.csv",'w') as f:
+    #     wr=csv.writer(f)
+    #     wr.writerow(nema)
+    # f.close()
 
     #PROVJERA
